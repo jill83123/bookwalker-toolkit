@@ -1,0 +1,105 @@
+/* 配色取自 BookWalker 官網 CSS 變數；元件形狀參考 fsrs-card-app */
+:root {
+  --bg: #f8f8f8;
+  --card: #ffffff;
+  --surface-2: #f3f3f3;
+  --line: #e6e6e6;
+  --text: #231815;
+  --muted: #707070;
+  --btn: #846551;
+  --btn-hover: #5f493a;
+  --accent: #9a7c67;
+  --accent-strong: #5f493a;
+  --accent-soft: #ece4df;
+  --gold: #b28a3d;
+  --price: #b8454a;
+  --ok: #4f8a5e;
+  --danger: #b8454a;
+  --danger-soft: #f8eceb;
+  --warn: #8a5a00;
+  --warn-soft: #fbf1dc;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', 'Chiron Hei HK', 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', system-ui, sans-serif;
+  font-size: 14px;
+  background: var(--bg);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+svg.lucide { vertical-align: -3px; flex-shrink: 0; }
+
+button, .btn {
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 8px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s, transform 0.1s, border-color 0.15s;
+}
+button:hover:not(:disabled), .btn:hover { background: var(--surface-2); }
+button:active:not(:disabled), .btn:active { transform: scale(0.98); }
+button:disabled { opacity: 0.4; cursor: not-allowed; }
+button.primary, .btn.primary { background: var(--btn); border-color: var(--btn); color: #fff; }
+button.primary:hover:not(:disabled), .btn.primary:hover { background: var(--btn-hover); border-color: var(--btn-hover); }
+button.danger { color: var(--danger); }
+button.danger:hover:not(:disabled) { background: var(--danger-soft); }
+
+/* 下拉選單元件（enhanceSelect） */
+.sb { position: relative; display: inline-block; min-width: 110px; }
+.sb-btn {
+  width: 100%; justify-content: flex-start; text-align: left; font-weight: 400;
+  min-height: 40px; padding: 4px 40px 4px 14px;
+}
+.sb-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sb-chev { position: absolute; top: 50%; right: 12px; transform: translateY(-50%); color: var(--muted); pointer-events: none; display: flex; transition: transform 0.15s; }
+.sb.open .sb-chev { transform: translateY(-50%) rotate(180deg); }
+.sb-btn:focus-visible, .sb.open .sb-btn { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 22%, transparent); }
+.sb-menu {
+  position: fixed; z-index: 70; list-style: none; overflow-y: auto; overscroll-behavior: contain;
+  background: var(--card); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 8px 24px rgb(0 0 0 / 0.12);
+  width: max-content; max-width: 90vw;
+}
+.sb-menu li { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 14px; font-size: 14px; cursor: pointer; }
+.sb-menu li[data-active="true"] { background: var(--surface-2); }
+.sb-menu li[aria-selected="true"] { font-weight: 600; color: var(--accent-strong); }
+.sb-menu li svg { color: var(--accent); }
+.fld .sb { width: 100%; display: block; }
+
+/* 折疊區塊 */
+.acc { background: var(--card); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 1px 2px rgb(0 0 0 / 0.04); margin-bottom: 14px; }
+.acc-head {
+  width: 100%; border: none; background: none; border-radius: 16px; justify-content: flex-start; text-align: left;
+  padding: 18px 22px; gap: 14px; min-height: 0;
+}
+.acc-head:hover:not(:disabled) { background: var(--surface-2); }
+.acc.open .acc-head { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+.acc-ico { width: 34px; height: 34px; flex-shrink: 0; border-radius: 50%; background: var(--accent-soft); color: var(--accent-strong); display: flex; align-items: center; justify-content: center; }
+.acc-t { flex: 1; min-width: 0; display: block; }
+.acc-t b { display: block; font-size: 15px; }
+.acc-t small { display: block; font-size: 12px; font-weight: 400; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.acc-chev { color: var(--muted); display: flex; transition: transform 0.15s; }
+.acc.open .acc-chev { transform: rotate(180deg); }
+.acc-body { display: none; border-top: 1px solid var(--line); padding: 22px 22px 24px; }
+.acc.open .acc-body { display: block; }
+.acc-body p { font-size: 12px; color: var(--muted); line-height: 1.7; margin-bottom: 12px; }
+
+button:focus:not(:focus-visible) { outline: none; }
+button:focus-visible { outline: 2px solid color-mix(in oklab, var(--accent) 50%, transparent); outline-offset: 2px; }
+
+/* 整列可點的標題列：按下時不縮放，否則灰底會往內縮 */
+.order-head:active:not(:disabled), .acc-head:active:not(:disabled), .tab:active:not(:disabled) { transform: none; }

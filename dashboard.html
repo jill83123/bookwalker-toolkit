@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>BookWalker 小工具</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Chiron+Hei+HK:wght@400;500;700&display=swap">
+<link rel="icon" href="icons/icon48.png">
+<link rel="stylesheet" href="theme.css">
+<style>
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 36px 28px 80px; }
+
+  header { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: 700; color: var(--text); }
+  .brand svg { color: var(--accent); }
+  .last-scan-txt { font-size: 12px; color: var(--muted); font-weight: 400; }
+  .actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; justify-content: flex-end; }
+
+  .scan-box { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 12px 16px; margin-bottom: 14px; font-size: 13px; display: none; }
+  .scan-box.err { color: var(--danger); display: block; }
+  .scan-box.on { display: block; }
+  .track { height: 5px; background: var(--line); border-radius: 3px; overflow: hidden; margin-top: 8px; }
+  .fill { height: 100%; background: var(--accent); width: 0; transition: width 0.3s; }
+
+  .notice { background: var(--warn-soft); border: 1px solid color-mix(in oklab, #e7b04f 50%, #ffffff); color: var(--warn); border-radius: 16px; padding: 10px 16px; margin-bottom: 14px; font-size: 13px; display: none; }
+
+  .check { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px; }
+  .check { min-height: 40px; }
+  .check input { appearance: none; width: 20px; height: 20px; border-radius: 6px; border: 1px solid var(--line); background: var(--card) center/14px no-repeat; cursor: pointer; transition: background-color 0.15s, border-color 0.15s; }
+  .check input:checked { background-color: var(--accent); border-color: var(--accent); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E"); }
+  .check input:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 30%, transparent); }
+
+  .tabs { display: flex; gap: 8px; border-bottom: 1px solid var(--line); align-items: flex-end; }
+  .tab { border: none; border-radius: 12px 12px 0 0; min-height: 44px; background: none; color: var(--muted); padding: 9px 18px; border-bottom: 2px solid transparent; }
+  .tab:hover:not(:disabled) { background: var(--surface-2); }
+  .tab.active { color: var(--accent-strong); border-bottom-color: var(--accent); font-weight: 500; }
+  .pane { display: none; padding-top: 28px; }
+  .pane.active { display: block; }
+
+  .m-label { font-size: 12px; font-weight: 600; letter-spacing: 0.04em; color: var(--muted); margin-bottom: 4px; }
+  .m-val { font-size: 22px; font-weight: 700; letter-spacing: -0.01em; }
+  .m-sub { font-size: 12px; color: var(--muted); margin-top: 0; }
+
+  .row { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+  .row label { font-size: 13px; color: var(--muted); }
+  .sec { font-size: 13px; font-weight: 700; color: var(--muted); margin: 28px 0 12px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; box-shadow: 0 1px 2px rgb(0 0 0 / 0.04); }
+  th { text-align: left; font-weight: 500; font-size: 12px; color: var(--muted); padding: 12px 18px; background: var(--surface-2); border-bottom: 1px solid var(--line); }
+  td { padding: 13px 18px; border-bottom: 1px solid var(--line); }
+  tr:last-child td { border-bottom: none; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  th.num { text-align: right; }
+  .bar-bg { background: var(--line); border-radius: 3px; height: 7px; overflow: hidden; min-width: 120px; }
+  .bar-fill { height: 100%; background: var(--accent); border-radius: 3px; }
+
+
+  .empty { text-align: center; padding: 50px 0; color: var(--muted); line-height: 1.9; }
+  .empty svg { margin-bottom: 8px; }
+  .scope-bar { display: flex; align-items: flex-end; justify-content: flex-end; gap: 20px; margin-bottom: 24px; flex-wrap: wrap; }
+  .pills { display: flex; gap: 8px; flex-wrap: wrap; }
+  .pill { min-height: 38px; padding: 4px 18px; font-size: 14px; border-radius: 999px; }
+  .pill.active { background: var(--btn); border-color: var(--btn); color: #fff; }
+  .pill.active:hover:not(:disabled) { background: var(--btn-hover); border-color: var(--btn-hover); }
+  .scan-area { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: flex-end; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 1px 2px rgb(0 0 0 / 0.04); padding: 24px; }
+  .summary { margin-bottom: 16px; }
+  .stats.four { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px 32px; }
+  .filter-bar { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 16px; }
+  .filter-left { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+  .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px; }
+  .metric { background: var(--card); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 1px 2px rgb(0 0 0 / 0.04); padding: 18px 22px; }
+  .metric .stat-val { font-size: 22px; }
+  .stat-val { font-size: 26px; font-weight: 700; letter-spacing: -0.01em; }
+  .stat-val.accent { color: var(--accent-strong); }
+  .summary-foot { margin-top: 22px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .chart-card { margin-bottom: 0; }
+  .card-title { font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 14px; }
+  .chart-wrap { position: relative; height: 220px; }
+  .odisc { font-size: 12px; font-weight: 600; background: var(--accent-soft); color: var(--accent-strong); border-radius: 8px; padding: 2px 10px; }
+  .odisc.none { background: none; color: var(--muted); font-weight: 400; }
+  .item { display: flex; gap: 12px; align-items: baseline; padding: 6px 0; font-size: 13px; }
+  .item .t { flex: 1; overflow-wrap: anywhere; line-height: 1.5; }
+  .item .cat { font-size: 11px; color: var(--muted); background: var(--card); border-radius: 5px; padding: 1px 7px; }
+  .item .p { text-align: right; font-variant-numeric: tabular-nums; }
+  .nodetail { font-size: 12px; color: var(--muted); padding: 4px 0 8px; }
+  .group { background: var(--card); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 1px 2px rgb(0 0 0 / 0.04); overflow: hidden; }
+  .detail-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 20px 0 12px; }
+  .group-body.flush { padding: 0; }
+  .group table { border: none; border-radius: 0; box-shadow: none; }
+  .group th { background: var(--card); }
+  .group td { padding: 13px 18px; }
+  #sub-yearly tr:last-child td { border-bottom: 1px solid var(--line); }
+  #month-tbody tr[data-m] { cursor: pointer; }
+  #month-tbody tr[data-m]:hover td { background: var(--surface-2); }
+  .group .pills { display: inline-flex; gap: 10px; }
+  .acc-head.static { display: flex; align-items: center; cursor: default; border-radius: 16px 16px 0 0; }
+  .acc-head.static:hover { background: none; }
+  /* 備份頁：每個項目一列，左邊說明、右邊按鈕 */
+  .backup-grid { display: flex; flex-direction: column; gap: 12px; }
+  #pane-backup .acc { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 20px 26px; margin-bottom: 0; }
+  #pane-backup .acc-head { width: auto; padding: 0; border-radius: 0; gap: 16px; flex: 1; min-width: 0; }
+  #pane-backup .acc-ico { width: 44px; height: 44px; }
+  #pane-backup .acc-t b { font-size: 16px; margin-bottom: 2px; }
+  #pane-backup .acc-t small { font-size: 13px; white-space: normal; }
+  #pane-backup .acc-body { border-top: none; padding: 0; flex-shrink: 0; }
+  .sub { display: none; }
+  .sub.active { display: block; }
+  .order { background: var(--card); border: 1px solid var(--line); border-radius: 12px; margin-bottom: 8px; overflow: hidden; }
+  .order:last-child { margin-bottom: 0; }
+  .order-head { display: flex; align-items: center; gap: 16px; width: 100%; border: none; border-radius: 0; background: none; padding: 14px 18px; min-height: 0; justify-content: flex-start; text-align: left; font-weight: 400; }
+  .order-head:hover:not(:disabled) { background: var(--surface-2); }
+  .order-head .chev { transition: transform 0.15s; color: var(--muted); display: flex; }
+  .order.open .chev { transform: rotate(180deg); }
+  .order-head .oid { color: var(--muted); font-size: 12px; min-width: 130px; }
+  .order-head .odate { font-size: 12px; color: var(--muted); }
+  .order-head .ogrow { flex: 1; }
+  .order-head .oamt { font-weight: 700; min-width: 70px; text-align: right; }
+  .order-body { display: none; border-top: 1px solid var(--line); padding: 6px 20px 14px; }
+  .order.open .order-body { display: block; }
+  .order-body .item .cat { background: var(--surface-2); }
+  .cart-bar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+  .cart-status { font-size: 12px; color: var(--muted); }
+  .cart-status.err { color: var(--danger); }
+  .cart-grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 24px; align-items: start; }
+  .cart-item { display: flex; align-items: center; gap: 16px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px 18px; margin-bottom: 12px; }
+  .cart-item.off { opacity: 0.5; }
+  .cart-item .t { flex: 1; min-width: 0; }
+  .cart-item .t div { overflow-wrap: anywhere; line-height: 1.5; }
+  .cart-item .meta { font-size: 11px; color: var(--muted); }
+  .cart-item .pr { text-align: right; font-size: 13px; min-width: 110px; }
+  .cart-item .pr s { color: var(--muted); font-size: 12px; margin-right: 6px; }
+  .cart-item .pr b { color: var(--price); }
+  .cart-item .del { min-height: 32px; padding: 4px 8px; }
+  .sumrow { display: flex; justify-content: space-between; padding: 8px 0; font-size: 13px; }
+  .sumrow span { color: var(--muted); }
+  .sumrow b.saved { color: var(--ok); }
+  .sep { border-top: 1px solid var(--line); margin: 12px 0; }
+  .fld { margin-bottom: 16px; }
+  .fld label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+  .fld select { width: 100%; }
+  .inl { display: flex; gap: 10px; }
+  .field { font-family: inherit; font-size: 14px; min-height: 40px; width: 100%; border: 1px solid var(--line); border-radius: 12px; padding: 4px 12px; background: var(--card); color: var(--text); outline: none; }
+  .field:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 20%, transparent); }
+  #cart-manual { padding: 14px 18px; }
+  .manual-row { display: flex; align-items: center; gap: 12px; }
+  .manual-row .grow { flex: 1; }
+  .manual-row .field:not(.grow) { width: 90px; }
+  tr.best td { background: var(--accent-soft); font-weight: 600; }
+  .tag-best { font-size: 10px; background: #b28a3d; color: #fff; border-radius: 6px; padding: 1px 6px; margin-left: 6px; }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 14px; line-height: 2; }
+  .btns { display: flex; gap: 12px; flex-wrap: wrap; }
+  #backup-msg { margin-top: 14px; font-size: 13px; min-height: 20px; }
+  #backup-msg.err { color: var(--danger); }
+  #backup-msg.ok { color: var(--ok); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand"><i data-icon="library" data-size="24"></i>BookWalker 小工具</div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="overview">消費</button>
+    <button class="tab" data-tab="cart">購物車試算</button>
+    <button class="tab" data-tab="backup">備份</button>
+  </div>
+
+  <div id="pane-overview" class="pane active">
+    <div class="filter-bar">
+      <div class="filter-left" id="filter-left">
+        <select id="year-sel" aria-label="年份"></select>
+        <label class="check"><input type="checkbox" id="include-free">納入免費書籍</label>
+      </div>
+      <div class="scan-area">
+        <span class="last-scan-txt" id="last-scan">尚未掃描</span>
+        <button id="scan-all"><i data-icon="refresh-cw"></i>掃描全部</button>
+        <button id="scan-new" class="primary"><i data-icon="zap"></i>只掃新訂單</button>
+        <button id="scan-stop" class="danger" style="display:none"><i data-icon="square"></i>停止掃描</button>
+      </div>
+    </div>
+    <div class="scan-box" id="scan-box"><span id="scan-text"></span><div class="track"><div class="fill" id="fill"></div></div></div>
+    <div class="notice" id="notice"></div>
+
+    <div id="overview-empty" class="empty" style="display:none"><i data-icon="inbox" data-size="36"></i><br>尚無資料<br>請先登入 BookWalker，再按上方「掃描全部」</div>
+
+    <div id="overview-content">
+      <div class="metrics">
+        <div class="metric"><div class="m-label" id="l-total">年度總花費</div><div class="stat-val" id="m-total">—</div></div>
+        <div class="metric"><div class="m-label">月均消費（有消費月份平均）</div><div class="stat-val" id="m-avg">—</div></div>
+        <div class="metric"><div class="m-label">最高單月<span id="m-peak-sub"></span></div><div class="stat-val" id="m-peak">—</div></div>
+        <div class="metric"><div class="m-label" id="l-count">年度訂單數</div><div class="stat-val" id="m-count">—</div></div>
+        <div class="metric"><div class="m-label" id="l-books">年度本數</div><div class="stat-val" id="m-books">—</div></div>
+        <div class="metric"><div class="m-label" id="l-disc">年度折數</div><div class="stat-val" id="m-disc">—</div></div>
+      </div>
+
+      <section class="card chart-card">
+        <div class="card-title" id="chart-title">每月趨勢</div>
+        <div class="chart-wrap"><canvas id="bar-chart" role="img" aria-label="每月消費長條圖"></canvas></div>
+      </section>
+
+      <div class="detail-bar">
+        <span class="pills"><button class="pill active" data-sub="months">月明細</button><button class="pill" data-sub="orders">訂單</button><button class="pill" data-sub="yearly">年度總計</button></span>
+        <span id="month-filter" style="display:none"><select id="month-sel3" aria-label="月份"></select></span>
+      </div>
+      <section class="group">
+        <div class="group-body flush">
+          <div id="sub-months" class="sub active">
+            <table>
+              <thead><tr><th id="th-month">月份</th><th></th><th class="num">金額</th><th class="num">訂單數</th><th class="num">本數</th></tr></thead>
+              <tbody id="month-tbody"></tbody>
+            </table>
+          </div>
+          <div id="sub-orders" class="sub"><div id="orders-list" style="padding:16px"></div></div>
+          <div id="sub-yearly" class="sub">
+            <table>
+              <thead><tr><th>年份</th><th class="num">總花費</th><th class="num">訂單數</th><th class="num">本數</th><th class="num">折數</th></tr></thead>
+              <tbody id="yearly-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div id="pane-cart" class="pane">
+    <div class="cart-grid">
+      <div>
+        <div class="cart-bar">
+          <button id="cart-read" class="primary"><i data-icon="shopping-cart"></i>讀取購物車</button>
+          <button id="cart-add-manual"><i data-icon="plus"></i>手動新增</button>
+          <span id="cart-status" class="cart-status"></span>
+          <button id="cart-clear" class="danger" style="margin-left:auto"><i data-icon="trash-2"></i>清空清單</button>
+        </div>
+        <form id="cart-manual" class="card" style="display:none;margin-bottom:12px">
+          <div class="manual-row">
+            <input class="field grow" id="cm-title" placeholder="書名（選填）">
+            <input class="field" id="cm-orig" type="number" min="0" placeholder="原價" required>
+            <input class="field" id="cm-sale" type="number" min="0" placeholder="售價" required>
+            <button class="primary" type="submit">加入</button>
+          </div>
+        </form>
+        <div id="cart-list"></div>
+      </div>
+      <div class="cart-side">
+        <div class="card">
+          <div class="m-label">已勾選</div>
+          <div class="sumrow"><span>本數</span><b id="c-count">0</b></div>
+          <div class="sumrow"><span>原價總和</span><b id="c-orig">$0</b></div>
+          <div class="sumrow"><span>已折扣</span><b id="c-saved" class="saved">—</b></div>
+          <div class="sumrow"><span>購物合計（售價）</span><b id="c-sale">$0</b></div>
+          <div class="sumrow"><span>售價折數</span><b id="c-disc">—</b></div>
+        </div>
+        <div style="height:10px"></div>
+        <section class="acc static open">
+      <div class="acc-head static"><span class="acc-ico"><i data-icon="sliders-horizontal"></i></span><span class="acc-t"><b>試算條件</b><small>優惠券、點數、會員等級、活動門檻</small></span></div>
+      <div class="acc-body">
+          <div class="fld"><label>優惠券折抵 $</label><input class="field" id="c-coupon" type="number" min="0" value="0"></div>
+          <div class="fld"><label>點數折抵 $</label><input class="field" id="c-pointuse" type="number" min="0" value="0"></div>
+          <div class="fld"><label>會員等級（點數回饋）</label><select id="c-lv"></select></div>
+          <div class="fld"><label>滿額送（選填）</label><span class="inl"><input class="field" id="c-t1" type="number" min="1" placeholder="門檻：1500"><input class="field" id="c-b1" type="number" min="0" placeholder="送：150"></span></div>
+          <div class="fld" style="margin-bottom:0"><label>滿額再折（選填）</label><span class="inl"><input class="field" id="c-t2" type="number" min="1" placeholder="門檻：1500"><input class="field" id="c-r2" type="number" min="0.1" max="10" step="0.1" placeholder="折：8.8"></span></div>
+          <div class="sep"></div>
+          <button id="cart-reset" style="width:100%"><i data-icon="rotate-ccw"></i>重置條件</button></div>
+    </section>
+        <section class="acc static open">
+      <div class="acc-head static"><span class="acc-ico"><i data-icon="calculator"></i></span><span class="acc-t"><b>實際結帳金額</b><small>從結帳頁抄，算出真實折數</small></span></div>
+      <div class="acc-body">
+          <div class="fld"><label>結帳金額 $</label><input class="field" id="c-actual" type="number" min="0" placeholder="例如：369"></div>
+          <div class="sumrow" style="padding-bottom:0"><span>實際折數</span><b id="c-actual-disc">—</b></div></div>
+    </section>
+      </div>
+    </div>
+    <div class="sec">活動比較（參考）</div>
+    <table>
+      <thead><tr><th>方案</th><th class="num">結帳金額</th><th class="num">回饋點數</th><th class="num">實際花費</th><th class="num">折數（結帳）</th><th class="num">折數（含回饋）</th></tr></thead>
+      <tbody id="cart-scen"></tbody>
+    </table>
+    <div class="hint" id="cart-hint"></div>
+  </div>
+
+  <div id="pane-backup" class="pane">
+    <div class="backup-grid">
+    <section class="acc static open">
+      <div class="acc-head static"><span class="acc-ico"><i data-icon="download"></i></span><span class="acc-t"><b>手動匯出／匯入</b><small>匯出全部訂單與設定；匯入會覆蓋目前資料</small></span></div>
+      <div class="acc-body">
+        <div class="btns">
+          <button id="file-export"><i data-icon="download"></i>匯出 JSON</button>
+          <button id="file-import"><i data-icon="upload"></i>匯入 JSON</button>
+          <input type="file" id="file-input" accept="application/json,.json" style="display:none">
+        </div></div>
+    </section>
+    <section class="acc static open">
+      <div class="acc-head static"><span class="acc-ico"><i data-icon="trash-2"></i></span><span class="acc-t"><b>資料管理</b><small>清除已掃描的訂單，建議先備份</small></span></div>
+      <div class="acc-body">
+        <button id="clear-btn" class="danger"><i data-icon="trash-2"></i>清除所有資料</button></div>
+    </section>
+    </div>
+    <div id="backup-msg"></div>
+  </div>
+</div>
+
+<script src="chart.min.js"></script>
+<script src="icons.js"></script>
+<script src="components.js"></script>
+<script src="backup.js"></script>
+<script src="dashboard.js"></script>
+<script src="cart.js"></script>
+</body>
+</html>

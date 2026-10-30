@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>BookWalker 小工具</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Chiron+Hei+HK:wght@400;500;700&display=swap">
+<link rel="icon" href="icons/icon48.png">
+<link rel="stylesheet" href="theme.css">
+<style>
+  body { width: 300px; padding: 20px; }
+  .head { display: flex; align-items: center; gap: 8px; font-weight: 700; margin-bottom: 18px; color: var(--accent); }
+  .stack { display: flex; flex-direction: column; gap: 10px; }
+  .stack button, .stack .btn { width: 100%; }
+  .status { margin-top: 18px; font-size: 12px; color: var(--muted); line-height: 1.6; }
+  .status.err { color: var(--danger); }
+  .track { height: 5px; background: var(--line); border-radius: 3px; overflow: hidden; margin-top: 6px; display: none; }
+  .fill { height: 100%; background: var(--accent); width: 0; transition: width 0.3s; }
+</style>
+</head>
+<body>
+  <div class="head"><i data-icon="library" data-size="18"></i>BookWalker 小工具</div>
+  <div class="stack">
+    <a class="btn primary" id="open-dash" href="#"><i data-icon="chart-column"></i>開啟統計頁</a>
+    <button id="scan-all"><i data-icon="refresh-cw"></i>掃描全部訂單</button>
+    <button id="scan-new"><i data-icon="zap"></i>只掃新訂單</button>
+    <button id="scan-stop" class="danger" style="display:none"><i data-icon="square"></i>停止掃描</button>
+  </div>
+  <div class="status" id="status">尚未掃描</div>
+  <div class="track" id="track"><div class="fill" id="fill"></div></div>
+  <script src="icons.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

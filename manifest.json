@@ -1,0 +1,42 @@
+{
+  "manifest_version": 3,
+  "name": "BookWalker 小工具",
+  "version": "2.0.0",
+  "description": "統計 BookWalker 購書花費、本數與折數；購物車用原價試算實際折數與各活動。",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuMVpdBnHOZZprCX+bH+koC7Q6/Cz9tvo9Ggb8AMXxNjrnDzuEKNp4AMdgKRfE2cosqDsownf760sOHCYv1G9EXSCs/PX02pilAAfhJ97ncD32BGO3kJaKl1wYOyEnBl6wiJeYGgTiKoGhF1xg47I1ofV3SUWwoX6p1ywqmVM98Nw7lINoHqAsixv8gAEuKR8LotKl7J1/vs9Grdwjx4X6oiYtfV/MKx8GbaKaxnPNZAB7Tzajf2jlKt+BRurBxekLZtamFflRDpRa2DU0vt1OYZGJKz+9Aq4Tc1oV0W14iMbRIiTIc1ylQg1RLUI3aNanrtK1uDaWoOvo8wrxjDfewIDAQAB",
+  "permissions": [
+    "storage",
+    "offscreen"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "host_permissions": [
+    "https://member.bookwalker.com.tw/*",
+    "https://www.bookwalker.com.tw/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.bookwalker.com.tw/product/*"
+      ],
+      "js": [
+        "price-helper.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
