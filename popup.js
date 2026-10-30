@@ -17,7 +17,7 @@ function render(s, lastScan, count) {
   if (running) {
     const pct = s.totalPages ? Math.round((s.page / s.totalPages) * 100) : 0;
     $('fill').style.width = pct + '%';
-    st.textContent = s.totalPages ? `掃描中… 第 ${s.page}/${s.totalPages} 頁，已抓 ${s.fetched} 筆明細` : '掃描中…';
+    st.textContent = '掃描中...';
   } else if (s?.error) {
     st.textContent = s.error;
   } else if (lastScan) {

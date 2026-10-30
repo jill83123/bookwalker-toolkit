@@ -17,11 +17,18 @@
   .last-scan-txt { font-size: 12px; color: var(--muted); font-weight: 400; }
   .actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; justify-content: flex-end; }
 
-  .scan-box { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 12px 16px; margin-bottom: 14px; font-size: 13px; display: none; }
-  .scan-box.err { color: var(--danger); display: block; }
+  .scan-box { background: var(--surface-2); border-radius: 12px; padding: 14px 18px; margin-bottom: 16px; font-size: 13px; display: none; }
+  .scan-box.err { background: var(--danger-soft); color: var(--danger); display: block; }
   .scan-box.on { display: block; }
-  .track { height: 5px; background: var(--line); border-radius: 3px; overflow: hidden; margin-top: 8px; }
-  .fill { height: 100%; background: var(--accent); width: 0; transition: width 0.3s; }
+  .scan-row { display: flex; align-items: center; gap: 10px; }
+  .scan-ico { color: var(--accent); display: flex; }
+  .scan-box.on .scan-ico svg { animation: spin 1.2s linear infinite; }
+  .scan-box.err .scan-ico { display: none; }
+  .scan-pct { margin-left: auto; font-weight: 600; color: var(--accent-strong); }
+  .track { height: 6px; background: var(--line); border-radius: 999px; overflow: hidden; margin-top: 12px; }
+  .scan-box.err .track { display: none; }
+  .fill { height: 100%; background: var(--accent); border-radius: 999px; width: 0; transition: width 0.3s; }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
   .notice { background: var(--warn-soft); border: 1px solid color-mix(in oklab, #e7b04f 50%, #ffffff); color: var(--warn); border-radius: 16px; padding: 10px 16px; margin-bottom: 14px; font-size: 13px; display: none; }
 
@@ -63,7 +70,8 @@
   .pill { min-height: 38px; padding: 4px 18px; font-size: 14px; border-radius: 999px; }
   .pill.active { background: var(--btn); border-color: var(--btn); color: #fff; }
   .pill.active:hover:not(:disabled) { background: var(--btn-hover); border-color: var(--btn-hover); }
-  .scan-area { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: flex-end; }
+  .scan-area { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: flex-end; margin-left: auto; }
+  .last-scan-txt:empty { display: none; }
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 1px 2px rgb(0 0 0 / 0.04); padding: 24px; }
   .summary { margin-bottom: 16px; }
   .stats.four { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px 32px; }
@@ -78,7 +86,7 @@
   .chart-card { margin-bottom: 0; }
   .card-title { font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 14px; }
   .chart-wrap { position: relative; height: 220px; }
-  .odisc { font-size: 12px; font-weight: 600; background: var(--accent-soft); color: var(--accent-strong); border-radius: 8px; padding: 2px 10px; }
+  .odisc { font-size: 12px; font-weight: 600; background: var(--accent-soft); color: var(--accent-strong); border-radius: 8px; padding: 2px 10px; min-width: 56px; text-align: center; white-space: nowrap; }
   .odisc.none { background: none; color: var(--muted); font-weight: 400; }
   .item { display: flex; gap: 12px; align-items: baseline; padding: 6px 0; font-size: 13px; }
   .item .t { flex: 1; overflow-wrap: anywhere; line-height: 1.5; }
@@ -117,7 +125,7 @@
   .order-head .odate { font-size: 12px; color: var(--muted); }
   .order-head .ogrow { flex: 1; }
   .order-head .oamt { font-weight: 700; min-width: 70px; text-align: right; }
-  .order-body { display: none; border-top: 1px solid var(--line); padding: 6px 20px 14px; }
+  .order-body { display: none; border-top: 1px solid var(--line); padding: 6px 20px; }
   .order.open .order-body { display: block; }
   .order-body .item .cat { background: var(--surface-2); }
   .cart-bar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
@@ -175,16 +183,19 @@
         <label class="check"><input type="checkbox" id="include-free">納入免費書籍</label>
       </div>
       <div class="scan-area">
-        <span class="last-scan-txt" id="last-scan">尚未掃描</span>
+        <span class="last-scan-txt" id="last-scan"></span>
         <button id="scan-all"><i data-icon="refresh-cw"></i>掃描全部</button>
         <button id="scan-new" class="primary"><i data-icon="zap"></i>只掃新訂單</button>
         <button id="scan-stop" class="danger" style="display:none"><i data-icon="square"></i>停止掃描</button>
       </div>
     </div>
-    <div class="scan-box" id="scan-box"><span id="scan-text"></span><div class="track"><div class="fill" id="fill"></div></div></div>
+    <div class="scan-box" id="scan-box">
+      <div class="scan-row"><span class="scan-ico"><i data-icon="refresh-cw" data-size="16"></i></span><span id="scan-text"></span><span id="scan-pct" class="scan-pct"></span></div>
+      <div class="track"><div class="fill" id="fill"></div></div>
+    </div>
     <div class="notice" id="notice"></div>
 
-    <div id="overview-empty" class="empty" style="display:none"><i data-icon="inbox" data-size="36"></i><br>尚無資料<br>請先登入 BookWalker，再按上方「掃描全部」</div>
+    <div id="overview-empty" class="empty" style="display:none"><i data-icon="inbox" data-size="36"></i><br>尚無資料<br>請先登入 BookWalker，再按上方的<b>掃描全部</b></div>
 
     <div id="overview-content">
       <div class="metrics">
@@ -193,7 +204,7 @@
         <div class="metric"><div class="m-label">最高單月<span id="m-peak-sub"></span></div><div class="stat-val" id="m-peak">—</div></div>
         <div class="metric"><div class="m-label" id="l-count">年度訂單數</div><div class="stat-val" id="m-count">—</div></div>
         <div class="metric"><div class="m-label" id="l-books">年度本數</div><div class="stat-val" id="m-books">—</div></div>
-        <div class="metric"><div class="m-label" id="l-disc">年度折數</div><div class="stat-val" id="m-disc">—</div></div>
+        <div class="metric"><div class="m-label" id="l-disc">年度平均折數</div><div class="stat-val" id="m-disc">—</div></div>
       </div>
 
       <section class="card chart-card">

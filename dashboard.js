@@ -17,7 +17,7 @@ async function loadData() {
   rawOrders = d.bwOrders || [];
   includeFree = !!d.bwSettings?.includeFree;
   $('include-free').checked = includeFree;
-  $('last-scan').textContent = d.bwLastScan ? `上次掃描：${fmtTime(d.bwLastScan)}` : '尚未掃描';
+  $('last-scan').textContent = d.bwLastScan ? `上次掃描：${fmtTime(d.bwLastScan)}` : '';
 }
 
 function fmtTime(ts) {
@@ -75,7 +75,7 @@ function renderAll() {
   const missing = orders.filter((o) => !o.hasItems).length;
   const notice = $('notice');
   notice.style.display = missing ? 'block' : 'none';
-  notice.textContent = `有 ${missing} 筆訂單缺少明細（舊版資料），本數與折數不含這些訂單。請按「掃描全部」補抓明細。`;
+  notice.innerHTML = `有 ${missing} 筆訂單缺少明細（舊版資料），本數與折數不含這些訂單。請按<b>掃描全部</b>補抓明細。`;
 
   $('overview-empty').style.display = years.length ? 'none' : '';
   $('overview-content').style.display = years.length ? '' : 'none';
@@ -103,7 +103,7 @@ function renderYear(orders) {
   $('l-total').textContent = pre + '總花費';
   $('l-count').textContent = pre + '訂單數';
   $('l-books').textContent = pre + '本數';
-  $('l-disc').textContent = pre + '折數';
+  $('l-disc').textContent = pre + '平均折數';
 
   // 以「年-月」為單位算月均與最高單月
   const byMonth = new Map();
@@ -177,6 +177,13 @@ function syncMinHeight() {
   body.style.minHeight = h + 'px';
 }
 
+// 月明細顯示中時，直接跟著表格實際高度走（視窗縮放、字型載入、列數變動都會更新）
+new ResizeObserver(() => {
+  const body = document.querySelector('.group-body');
+  const h = Math.ceil($('sub-months').getBoundingClientRect().height);
+  if (body && h > 0) body.style.minHeight = h + 'px';
+}).observe($('sub-months'));
+
 /* ── 明細：月明細／訂單／年度總計 ── */
 function renderMonths(orders) {
   const rowHtml = (name, total, count, books, max, y, m) => `<tr${count ? ` data-y="${y}" data-m="${m}" title="查看這個月的訂單"` : ''}>
@@ -239,7 +246,7 @@ function renderOrders(orders) {
 function orderCard(o) {
   const date = `${o.year}/${String(o.month).padStart(2, '0')}/${String(o.day).padStart(2, '0')}`;
   const body = !o.hasItems
-    ? '<div class="nodetail">此訂單沒有明細資料，請按「掃描全部」補抓。</div>'
+    ? '<div class="nodetail">此訂單沒有明細資料，請按<b>掃描全部</b>補抓。</div>'
     : o.eItems.length
       ? o.eItems.map((it) => `<div class="item"><span class="t">${esc(it.title)}</span><span class="cat">${esc(it.category)}</span><span class="p">${money(it.price)} × ${it.qty} 本</span></div>`).join('')
       : '<div class="nodetail">沒有可顯示的項目（免費書已隱藏）。</div>';
@@ -328,12 +335,13 @@ function renderScan(s) {
   const hasErr = !running && s?.error && s.error !== '已停止';
   box.className = 'scan-box' + (running ? ' on' : hasErr ? ' err' : '');
   if (running) {
-    $('scan-text').textContent = s.totalPages
-      ? `掃描中… 第 ${s.page}/${s.totalPages} 頁，已抓 ${s.fetched} 筆明細${s.failed ? `（${s.failed} 筆失敗）` : ''}`
-      : '掃描中…';
-    $('fill').style.width = (s.totalPages ? Math.round((s.page / s.totalPages) * 100) : 0) + '%';
+    const pct = s.totalPages ? Math.round((s.page / s.totalPages) * 100) : 0;
+    $('scan-text').textContent = '掃描中...' + (s.failed ? `（${s.failed} 筆明細抓取失敗）` : '');
+    $('scan-pct').textContent = '';
+    $('fill').style.width = pct + '%';
   } else if (hasErr) {
     $('scan-text').textContent = s.error;
+    $('scan-pct').textContent = '';
     $('fill').style.width = '0';
   }
 }

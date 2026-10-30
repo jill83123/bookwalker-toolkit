@@ -47,9 +47,8 @@
     wrap.innerHTML = `
       <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
         <div>
-          <span style="color:#707070;">原價</span> <b style="font-weight:600;color:#5f493a;">$${info.origPrice}</b>
-          <span style="color:#707070;margin-left:10px;">售價</span> <b style="color:#b8454a;font-weight:600;">$${info.salePrice}</b>
-          <span style="margin-left:6px;font-size:11px;background:#ece4df;color:#5f493a;padding:1px 7px;border-radius:6px;font-weight:600;">${disc} 折</span>
+          <div style="font-size:11px;font-weight:600;color:#9a7c67;">BookWalker 小工具</div>
+          <span style="font-size:24px;font-weight:700;color:#b8454a;line-height:1.3;">${disc}</span><span style="font-size:13px;font-weight:600;color:#b8454a;margin-left:3px;">折</span>
         </div>
         <button id="bwph-add" style="display:inline-flex;align-items:center;padding:7px 14px;background:#846551;color:#fff;border:1px solid #846551;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;"></button>
       </div>`;

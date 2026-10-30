@@ -37,7 +37,7 @@ async function saveRules() {
 function renderCart() {
   const list = $('cart-list');
   if (!cartItems.length) {
-    list.innerHTML = '<div class="empty"><i data-icon="shopping-cart" data-size="32"></i><br>清單是空的<br>按「讀取購物車」，或在商品頁按「加入購物車試算」</div>';
+    list.innerHTML = '<div class="empty"><i data-icon="shopping-cart" data-size="32"></i><br>清單是空的<br>按<b>讀取購物車</b>，或在商品頁按<b>加入購物車試算</b></div>';
     hydrateIcons(list);
   } else {
     list.innerHTML = cartItems.map((it, i) => `

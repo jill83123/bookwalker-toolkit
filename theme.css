@@ -31,6 +31,8 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+button, input, select, textarea { font-variant-numeric: tabular-nums; }
+
 svg.lucide { vertical-align: -3px; flex-shrink: 0; }
 
 button, .btn {
@@ -38,7 +40,7 @@ button, .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   min-height: 40px;
   padding: 8px 16px;
   border-radius: 12px;
