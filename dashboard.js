@@ -70,7 +70,8 @@ function renderAll() {
   const orders = effectiveOrders();
   const years = [...new Set(orders.map((o) => o.year))].sort((a, b) => b - a);
   // 預設顯示今年；今年沒有資料就退到最近有資料的一年
-  if (year !== 'all' && !years.includes(year)) year = years.includes(new Date().getFullYear()) ? new Date().getFullYear() : (years[0] ?? 'all');
+  // 沒有資料時不要動 year，等掃描完成後才會套用預設（今年）
+  if (years.length && year !== 'all' && !years.includes(year)) year = years.includes(new Date().getFullYear()) ? new Date().getFullYear() : years[0];
 
   const missing = orders.filter((o) => !o.hasItems).length;
   const notice = $('notice');
