@@ -353,40 +353,33 @@ chrome.storage.onChanged.addListener(async (changes) => {
 });
 
 /* ── 備份 ── */
-function backupMsg(text, kind = '') {
-  const el = $('backup-msg');
-  el.textContent = text;
-  el.className = kind;
-}
-async function guarded(label, fn) {
+async function guarded(fn) {
   const btns = document.querySelectorAll('#pane-backup button');
   btns.forEach((b) => (b.disabled = true));
-  backupMsg(label + '…');
   try { await fn(); } catch (e) {
-    backupMsg(e.message, 'err');
+    alert(e.message);
   } finally { btns.forEach((b) => (b.disabled = false)); }
 }
 
-$('file-export').addEventListener('click', () => guarded('匯出中', async () => {
+$('file-export').addEventListener('click', () => guarded(async () => {
   const blob = new Blob([JSON.stringify(await buildBackup(), null, 1)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = `bw-spending-backup-${new Date().toISOString().slice(0, 10)}.json`;
   a.click();
   URL.revokeObjectURL(a.href);
-  backupMsg('已匯出 JSON', 'ok');
 }));
 $('file-import').addEventListener('click', () => $('file-input').click());
 $('file-input').addEventListener('change', (e) => {
   const file = e.target.files[0];
   e.target.value = '';
   if (!file) return;
-  guarded('匯入中', async () => {
+  guarded(async () => {
     const data = JSON.parse(await file.text());
     const n = data?.bwOrders?.length ?? 0;
-    if (!confirm(`匯入檔含 ${n} 筆訂單，將覆蓋目前資料，確定匯入？`)) { backupMsg(''); return; }
+    if (!confirm(`匯入檔含 ${n} 筆訂單，將覆蓋目前資料，確定匯入？`)) return;
     await applyBackup(data);
-    backupMsg(`已匯入 ${n} 筆訂單`, 'ok');
+    alert(`已匯入 ${n} 筆訂單`);
   });
 });
 
